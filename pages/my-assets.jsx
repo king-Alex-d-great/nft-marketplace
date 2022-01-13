@@ -10,27 +10,29 @@ import styles from "../styles/Home.module.css";
 import NFT from "../artifacts/contracts/NFT.sol/NFT.json";
 import Market from "../artifacts/contracts/Market.sol/NFTMarket.json";
 
-export default function Home() {
+export default function MyAssets() {
   const [nfts, setNfts] = useState([]);
   const [loadingState, setLoadingState] = useState(true);
 
   async function loadNFTs() {
-    const provider = new ethers.providers.JsonRpcProvider();
+    const web3Modal = new Web3Modal();
+    const connection = await web3Modal.connect();
+    const provider = new ethers.providers.Web3Provider(connection);
+    const signer = provider.getSigner();
+
     const tokenContract = new ethers.Contract(nftAddress, NFT.abi, provider);
     const marketContract = new ethers.Contract(
       nftMarketAddress,
       Market.abi,
-      provider
+      signer
     );
 
-    let items = await marketContract.fetchMarketItems();
+    let items = await marketContract.fetchMyNFTs();
     items = await Promise.all(
       items.map(async (item) => {
         const tokenUri = await tokenContract.tokenURI(item.tokenId);
         const meta = await axios.get(tokenUri);
         const price = ethers.utils.formatUnits(item.price.toString(), "ether");
-        console.log(item.price);
-
         return (item = {
           price,
           tokenId: item.tokenId.toNumber(),
@@ -52,30 +54,8 @@ export default function Home() {
     })();
   }, []);
 
-  async function buyNFT(nft) {
-    const web3Modal = new Web3Modal();
-    const connection = await web3Modal.connect();
-    const provider = new ethers.providers.Web3Provider(connection);
-
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(nftMarketAddress, Market.abi, signer);
-    const price = ethers.utils.parseUnits(nft.price.toString(), "ether");
-    console.log(price);
-    const transaction = await contract.createMarketSale(
-      nftAddress,
-      nft.tokenId,
-      { value: price }
-    );
-    await transaction.wait();
-    await loadNFTs();
-  }
-
   if (!loadingState && !nfts.length) {
-    return (
-      <h1 className="px-20 py-10 text-3xl">
-        There are no items in the marketplace.
-      </h1>
-    );
+    return <h1 className="px-20 py-10 text-3xl">No assets owned.</h1>;
   }
 
   return (
@@ -113,7 +93,7 @@ export default function Home() {
                         className="w-full bg-pink-500 text-white font-bold py-2 px-12 rounded"
                         onClick={() => buyNFT(nft)}
                       >
-                        Buy
+                        Sell
                       </button>
                     </div>
                   </div>
