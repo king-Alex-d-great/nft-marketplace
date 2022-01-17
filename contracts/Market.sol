@@ -17,6 +17,7 @@ contract NFTMarket is ReentrancyGuard {
     owner = payable(msg.sender);
   }
 
+//Items to be sold in the market
   struct MarketItem {
     uint256 itemId;
     address nftContract;
@@ -27,7 +28,9 @@ contract NFTMarket is ReentrancyGuard {
     bool sold;
   }
 
+//mapping to hold all the market items
   mapping(uint256 => MarketItem) private idToMarketItem;
+
 
   event MarketItemCreated(
     uint256 indexed itemId,

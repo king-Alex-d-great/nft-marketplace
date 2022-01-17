@@ -18,7 +18,7 @@ describe("NFTMarket", function () {
 
   const auctionPrice = ethers.utils.parseUnits("100", "ether");
 
-  await nft.createToken("https://thechidiebere.com");
+  await nft.createToken("https://github.com/king-Alex-d-great");
   await nft.createToken("https://lynxie.vercel.app");
 
   await market.createMarketItem(nftContractAddress, 1, auctionPrice, {
